@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080b16" />
+  <meta name="description" content="Starfall — a neon arena survival experience." />
+  <title>Starfall — Arena Survival</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="game-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Starfall home"><span class="brand-mark">✦</span> STARFALL</a>
+      <div class="topbar-right"><span class="status-dot"></span> ARENA ONLINE</div>
+    </header>
+
+    <section class="game-layout" aria-label="Starfall game">
+      <div class="arena-wrap">
+        <canvas id="gameCanvas" aria-label="Game arena"></canvas>
+        <div class="intro-cinematic" id="introCinematic" role="dialog" aria-label="Starfall opening transmission">
+          <div class="intro-stars"></div>
+          <div class="intro-scanline"></div>
+          <div class="intro-content">
+            <div class="intro-signal"><span></span> INCOMING TRANSMISSION</div>
+            <div class="intro-mark">✦</div>
+            <p class="intro-kicker">STARFALL SYSTEMS // ARCHIVE 09</p>
+            <h2>WHEN THE LIGHT<br /><em>GOES QUIET.</em></h2>
+            <div class="intro-divider"></div>
+            <p class="intro-copy">One pilot remains. The void is waking.</p>
+            <p class="intro-message">DISTRESS BEACON: <span>ACTIVE</span><br />ALL OUTPOSTS HAVE GONE DARK.</p>
+            <p class="intro-coordinate">COORDINATES LOCKED <span>•</span> HULL SIGNAL DETECTED</p>
+          </div>
+          <button class="intro-skip" id="introSkip" type="button">SKIP TRANSMISSION <span>↗</span></button>
+          <div class="intro-progress" aria-hidden="true"><span></span></div>
+        </div>
+        <div class="touch-controls" id="touchControls" hidden aria-label="Touch movement control">
+          <div class="touch-stick" id="touchStick"><span id="touchNub"></span></div>
+        </div>
+        <button class="dash-btn" id="dashButton" type="button" hidden>DASH</button>
+
+        <div class="hud" id="hud" hidden>
+          <div class="hud-top">
+            <div class="hud-sector"><span class="hud-label">ACTIVE ROUTE</span><strong id="hudSectorName">DEEP SPACE</strong><small id="hudSectorCode">SECTOR 09</small></div>
+            <div class="health-block">
+              <span class="hud-label">HULL / AEGIS</span>
+              <div class="bar"><div id="healthFill" class="bar-fill health-fill"></div></div>
+              <div class="bar shield-bar"><div id="shieldFill" class="bar-fill shield-fill"></div></div>
+            </div>
+            <div class="wave-block"><span class="hud-label">WAVE</span><strong id="waveValue">1</strong></div>
+            <div class="combo-block" id="comboBlock"><span class="hud-label">COMBO</span><strong id="comboValue">x1</strong></div>
+            <div class="score-block"><span class="hud-label">SCORE</span><strong id="scoreValue">0</strong></div>
+          </div>
+
+          <div class="boss-hud" id="bossHud" hidden>
+            <div class="boss-label"><span id="bossName">VOID TITAN</span><span id="bossHpText">100%</span></div>
+            <div class="bar boss-bar"><div id="bossFill" class="bar-fill boss-fill"></div></div>
+          </div>
+
+          <div class="toast" id="toast" hidden>
+            <span id="toastKicker">INCOMING</span>
+            <strong id="toastTitle">WAVE 01</strong>
+          </div>
+
+          <div class="ability-row">
+            <div class="ability">
+              <span>DASH</span>
+              <div class="bar"><div id="dashFill" class="bar-fill dash-fill"></div></div>
+            </div>
+            <button class="autofire-toggle" id="autoFireToggle" type="button" hidden aria-pressed="true">
+              <span>AUTO FIRE</span><b>ON</b>
+            </button>
+            <button class="autofire-toggle transformer-toggle" id="transformToggle" type="button" hidden>
+              <span id="transformLabel">TRANSFORM</span><b>T</b>
+            </button>
+            <div class="buffs" id="buffList"></div>
+          </div>
+
+          <div class="xp-block">
+            <div class="xp-label">
+              <span>LEVEL <b id="levelValue">1</b></span>
+              <span><b id="xpValue">0</b> / <b id="xpNeeded">12</b> XP</span>
+            </div>
+            <div class="bar xp-bar"><div id="xpFill" class="bar-fill xp-fill"></div></div>
+          </div>
+          <div class="hud-bottom">
+            <span>WASD / ARROWS <i>MOVE</i></span>
+            <span><kbd>CLICK</kbd> <i>FIRE</i></span>
+            <span><kbd>F</kbd> <i>AUTO FIRE</i></span>
+            <span><kbd>T</kbd> <i>TRANSFORM</i></span>
+            <span><kbd>SPACE</kbd> <i>DASH</i></span>
+            <span><kbd>ESC</kbd> / <kbd>P</kbd> <i>PAUSE</i></span>
+          </div>
+        </div>
+
+        <div class="screen" id="startScreen">
+          <div class="screen-card start-card">
+            <div class="card-corner-label"><span id="sectorCode">SECTOR 09</span> <span>/</span> <b id="sectorName">DEEP SPACE</b></div>
+            <div class="eyebrow"><span></span> SURVIVE THE INFINITE</div>
+            <h1>THE STARS<br /><em>DON’T WAIT.</em></h1>
+            <p>Your ship is the last light in a hostile galaxy. Dash through fire, chain combos, and bring down the titans that arrive every five waves.</p>
+            <div class="launch-meta" aria-label="Mission parameters">
+              <span><b>THREAT</b><strong>EXTREME</strong></span>
+              <span><b>MODE</b><strong>ENDLESS</strong></span>
+              <span><b>CREW</b><strong>1 PILOT</strong></span>
+            </div>
+            <div class="sector-picker">
+              <div class="picker-heading"><span>EXPEDITION ROUTE</span><i>SELECT SECTOR</i></div>
+              <div class="sector-grid" id="sectorGrid"></div>
+              <div class="sector-preview"><span class="preview-signal"></span><div><b id="sectorPreviewName">DEEP SPACE</b><p id="sectorPreviewDesc">A silent frontier threaded with drifting wreckage.</p></div><strong id="sectorPreviewStatus">READY</strong></div>
+            </div>
+            <div class="feature-row">
+              <span>✦ AUTO-WEAPONS</span>
+              <span>✦ BOSSES</span>
+              <span>✦ COMBOS</span>
+              <span>✦ LIVE UPGRADES</span>
+            </div>
+            <button class="primary-button" id="startButton">ENTER THE ARENA <span>↗</span></button>
+            <button class="shop-button" id="shopButton"><span>◈</span> OPEN STARFORGE EXCHANGE <b id="menuVeers">100</b></button>
+            <button class="game-reset-button" id="gameResetButton" type="button">RESET GAME DATA</button>
+            <div class="start-note">MOVE WITH <b>W A S D</b> OR <b>ARROWS</b> <span>·</span> <b>SPACE</b> TO DASH <span>·</span> ESC / P TO PAUSE</div>
+            <div class="best-line">PERSONAL BEST <b id="bestScore">0</b></div>
+          </div>
+        </div>
+
+        <div class="screen hidden" id="shopScreen">
+          <div class="screen-card shop-card">
+            <div class="shop-header">
+              <div>
+                <div class="eyebrow"><span></span> STARFALL PROVISIONS</div>
+                <h2>STARFORGE EXCHANGE</h2>
+              </div>
+              <div class="veers-wallet"><span>◈</span><b id="shopVeers">100</b><small>VEERS</small></div>
+              <button class="market-back-button" id="shopBackButton" type="button" aria-label="Return to launch deck">← BACK</button>
+            </div>
+            <p>Spend Veers on permanent weapons, upgrades, and companion modules. Loadouts activate on your next run.</p>
+            <div class="shop-tabs"><span class="active">ARSENAL</span><span>COMPANIONS</span><span>UPGRADES</span><i>10 normal · 1,000 titan</i></div>
+            <div class="shop-grid" id="shopItems"></div>
+            <div class="transformer-picker" id="transformerPicker" hidden>
+              <div><b>TRANSFORMER LOADOUT</b><small>Choose your bot form</small></div>
+              <div class="transformer-options" id="transformerOptions"></div>
+            </div>
+            <button class="reset-progress-button" id="resetProgressButton" type="button">RESET VEERS &amp; SHIP UPGRADES</button>
+            <button class="text-button" id="closeShopButton">RETURN TO LAUNCH DECK</button>
+          </div>
+        </div>
+
+        <div class="screen hidden" id="pauseScreen">
+          <div class="screen-card compact-card">
+            <div class="eyebrow"><span></span> TAKE A BREATH</div>
+            <h2>PAUSED</h2>
+            <p>The swarm can wait. For a moment.</p>
+            <button class="primary-button" id="resumeButton">BACK TO THE FIGHT <span>↗</span></button>
+            <button class="text-button" id="restartPauseButton">RESTART RUN</button>
+          </div>
+        </div>
+
+        <div class="screen hidden" id="upgradeScreen">
+          <div class="screen-card upgrade-card">
+            <div class="eyebrow"><span></span> SIGNAL DETECTED</div>
+            <h2>CHOOSE AN UPGRADE</h2>
+            <p>Your ship adapts. Pick one boost to keep the stars on your side.</p>
+            <div class="upgrade-options" id="upgradeOptions"></div>
+          </div>
+        </div>
+
+        <div class="screen hidden" id="gameOverScreen">
+          <div class="screen-card compact-card">
+            <div class="eyebrow"><span></span> SIGNAL LOST</div>
+            <h2>RUN ENDED</h2>
+            <p id="runSummary">You fought bravely out there.</p>
+            <div class="final-stats four">
+              <div><span>FINAL SCORE</span><b id="finalScore">0</b></div>
+              <div><span>WAVE REACHED</span><b id="finalWave">1</b></div>
+              <div><span>ELIMINATIONS</span><b id="finalKills">0</b></div>
+              <div><span>MAX COMBO</span><b id="finalCombo">x1</b></div>
+            </div>
+            <button class="primary-button" id="playAgainButton">TRY AGAIN <span>↗</span></button>
+            <button class="text-button" id="homeButton">BACK TO HOME</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-panel">
+        <div class="panel-section mission-section">
+          <div class="section-kicker">CURRENT MISSION <span class="live-tag">LIVE</span></div>
+          <div class="mission-route"><span id="missionSectorCode">SECTOR 09</span><span class="route-line"></span><span>ACTIVE</span></div>
+          <h2 id="missionSectorName">LAST LIGHT</h2>
+          <p>Hold the line against the incoming void. Titans breach every five waves.</p>
+          <div class="mission-divider"></div>
+          <div class="mission-stat"><span>ELIMINATIONS</span><b id="killsValue">0</b></div>
+          <div class="mission-stat"><span>TIME SURVIVED</span><b id="timeValue">00:00</b></div>
+          <div class="mission-stat"><span>MAX COMBO</span><b id="panelCombo">x1</b></div>
+          <div class="mission-stat"><span>BOSSES DOWN</span><b id="panelBosses">0</b></div>
+          <div class="mission-stat"><span>BEST SCORE</span><b id="panelBest">0</b></div>
+          <div class="mission-stat veers-stat"><span>VEERS BANKED</span><b><span>◈</span> <i id="panelVeers">100</i></b></div>
+        </div>
+        <div class="panel-section intel-section">
+          <div class="section-kicker">FIELD INTEL</div>
+          <div class="intel-item"><span class="intel-icon blue">✦</span><div><b>Gather stardust</b><p>Collect fragments to level up and choose weapons.</p></div></div>
+          <div class="intel-item"><span class="intel-icon pink">⌁</span><div><b>Dash through fire</b><p>Space blinks you through contact and shots.</p></div></div>
+          <div class="intel-item"><span class="intel-icon gold">⌖</span><div><b>Chain your kills</b><p>Combos multiply score. Bosses arrive on wave 5, 10, 15…</p></div></div>
+        </div>
+        <div class="panel-footer"><span>STARFALL SYSTEMS</span><span>BUILD 02.40</span></div>
+      </aside>
+    </section>
+    <footer class="page-footer"><span>© 2089 STARFALL SYSTEMS</span><span>ONE SHIP. INFINITE ODDS.</span></footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
